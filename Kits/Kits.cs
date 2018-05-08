@@ -15,9 +15,9 @@ namespace Oxide.Plugins
 
         private static Kits Instance;
 
-        private Configuration _configuration;
+        private readonly Data _data = new Data();
 
-        private Data _data;
+        private Configuration _configuration;
 
         #endregion
 
@@ -485,7 +485,8 @@ namespace Oxide.Plugins
         private void Init()
         {
             Instance = this;
-            _data = Interface.Oxide.DataFileSystem.ReadObject<Data>("Kits");
+            _data.Kits = Interface.Oxide.DataFileSystem.ReadObject<HashSet<Kit>>("Kits/Kits");
+            _data.Players = Interface.Oxide.DataFileSystem.ReadObject<HashSet<PlayerData>>("Kits/PlayerData");
             permission.RegisterPermission("kits.admin", this);
             foreach (var kit in _data.Kits)
             {
@@ -508,7 +509,11 @@ namespace Oxide.Plugins
             kit.Give(player);
         }
 
-        private void OnServerSave() => Interface.Oxide.DataFileSystem.WriteObject("Kits", _data);
+        private void OnServerSave()
+        {
+            Interface.Oxide.DataFileSystem.WriteObject("Kits/Kits", _data.Kits);
+            Interface.Oxide.DataFileSystem.WriteObject("Kits/PlayerData", _data.Players);
+        }
 
         private void Unload() => OnServerSave();
 
