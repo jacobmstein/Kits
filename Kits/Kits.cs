@@ -316,6 +316,7 @@ namespace Oxide.Plugins
                         var playerData = _data[player.userID];
                         playerData.AddRedemption(kit.Name);
                         playerData.SetCooldown(kit.Name, kit.Cooldown);
+                        LogToFile("RedemptionLog", $"{DateTime.UtcNow.ToShortTimeString()} {player.displayName, -35}{player.userID, -20}{kit.Name}", this, false);
                         break;
                     }
             }
