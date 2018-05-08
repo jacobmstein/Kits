@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Oxide.Core;
-using Oxide.Plugins.KitsExtensions;
 
 namespace Oxide.Plugins
 {
@@ -327,6 +326,19 @@ namespace Oxide.Plugins
         #region Methods
 
         /// <summary>
+        /// Clears the player's inventory.
+        /// </summary>
+        /// <param name="player">The player.</param>
+        public static void ClearInventory(BasePlayer player)
+        {
+            foreach (var item in player.inventory.AllItems())
+            {
+                item.Remove();
+                item.DoRemove();
+            }
+        }
+
+        /// <summary>
         /// Checks whether or not the player can use the kit. 
         /// </summary>
         /// <param name="userId">The player's Steam ID.</param>
@@ -506,7 +518,7 @@ namespace Oxide.Plugins
                 return;
             }
 
-            player.ClearInventory();
+            ClearInventory(player);
             kit.Give(player);
         }
 
@@ -730,24 +742,5 @@ namespace Oxide.Plugins
         }
 
         #endregion
-    }
-
-    namespace KitsExtensions
-    {
-        public static class Extensions
-        {
-            /// <summary>
-            /// Clears the player's inventory.
-            /// </summary>
-            /// <param name="player">The player.</param>
-            public static void ClearInventory(this BasePlayer player)
-            {
-                foreach (var item in player.inventory.AllItems())
-                {
-                    item.Remove();
-                    item.DoRemove();
-                }
-            }
-        }
     }
 }
