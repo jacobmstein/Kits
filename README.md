@@ -149,20 +149,23 @@ The permission `kits.admin` is required.
 `/kit update example`
 
 ## Configuration
-Simply enter the names of kits to spawn with. When a player respawns, the last one they have permission to use will be given.
-#### Default Configuration
+### Default Configuration
 ```javascript
 {
-  "Default kits (lowest to highest priority)": []
+  "Default kits (lowest to highest priority)": [],
+  "Wipe player data on new save (true/false)": true
 }
 ```
-#### Example Configuration
+#### Default kits
+Simply enter the names of kits to spawn with. When a player respawns, the last one they have permission to use will be given.
+### Example Configuration
 ```javascript
 {
   "Default kits (lowest to highest priority)": [
     "default",
     "donator"
-  ]
+  ],
+  "Wipe player data on new save (true/false)": true
 }
 ```
 

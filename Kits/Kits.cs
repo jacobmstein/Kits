@@ -522,6 +522,14 @@ namespace Oxide.Plugins
             kit.Give(player);
         }
 
+        private void OnNewSave()
+        {
+            if (_configuration.WipePlayerData)
+            {
+                _data.Players.Clear();
+            }
+        }
+
         private void OnServerSave()
         {
             Interface.Oxide.DataFileSystem.WriteObject("Kits/Kits", _data.Kits);
@@ -538,6 +546,9 @@ namespace Oxide.Plugins
         {
             [JsonProperty("Default kits (lowest to highest priority)")]
             public List<string> DefaultKits { get; set; } = new List<string>();
+
+            [JsonProperty("Wipe player data on new save (true/false)")]
+            public bool WipePlayerData { get; set; } = true;
         }
 
         private class Data
