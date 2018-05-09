@@ -243,7 +243,7 @@ private object CanRedeemKit(BasePlayer player) => blockAllKits
     ? $"{Title} is preventing you from using that kit." 
     : null;
 ```
-> Note, the overload with the `name` argument will override the one without, as it's more specific.
+> Note, the overload with the `name` parameter will override the one without, as it's more specific.
 
 ```csharp
 private object CanRedeemKit(BasePlayer player, string name) => name == "blocked" 
