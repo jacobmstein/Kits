@@ -38,7 +38,7 @@ namespace Oxide.Plugins
                 return;
             }
 
-            PrintToChat(player, $" You may{(Kits.Call<bool>("IsKitRedeemable", player.userID, args[0].ToLower()) ? "" : " not")} redeem kit {args[0].ToLower()}.");
+            PrintToChat(player, $" You may{(Kits.Call<bool>("IsKitRedeemable", player, args[0].ToLower()) ? "" : " not")} redeem kit {args[0].ToLower()}.");
         }
 
         private object CanRedeemKit(BasePlayer player, string name) => name == "blocked" 

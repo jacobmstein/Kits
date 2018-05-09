@@ -216,15 +216,15 @@ var isKit = Kits.Call<bool>("IsKit", "example");
 ### `IsKitRedeemable`
 `IsKitRedeemable` returns whether the `player` can use the kit, taking into account permissions, limits, and cooldowns.
 #### Arguments
-| Argument Name | Type     | Description            |
-| ------------- | -------- | ---------------------- |
-| `userId`      | `ulong`  | The player's Steam ID. |
-| `name`        | `string` | The name of the kit.   |
+| Argument Name | Type         | Description          |
+| ------------- | ------------ | -------------------- |
+| `player`      | `BasePlayer` | The player.          |
+| `name`        | `string`     | The name of the kit. |
 #### Syntax
-`IsKitRedeemable(ulong userId, string name)`
+`IsKitRedeemable(BasePlayer player, string name)`
 #### Example
 ```csharp
-var isRedeemable = Kits.Call<bool>("IsKitRedeemable", player.userID, "example");
+var isRedeemable = Kits.Call<bool>("IsKitRedeemable", player, "example");
 ```
 
 ---

@@ -35,7 +35,7 @@ namespace Oxide.Plugins
 
         private bool IsKit(string name) => _data[name] != null;
 
-        private bool IsKitRedeemable(ulong userId, string name)
+        private bool IsKitRedeemable(BasePlayer player, string name)
         {
             var kit = _data[name];
             if (kit == null)
@@ -44,7 +44,7 @@ namespace Oxide.Plugins
             }
 
             string message;
-            return IsKitRedeemable(userId, kit, out message);
+            return IsKitRedeemable(player, kit, out message);
         }
 
         private void GiveKit(BasePlayer player, string name) => _data[name]?.Give(player);
@@ -60,8 +60,7 @@ namespace Oxide.Plugins
             {
                 var kits = _data.Kits.Where(x => HasPermission(player, $"kits.{x.Name}")).ToArray();
                 Message(player, "List", kits.Length == 1 ? string.Empty : "s", kits.Any()
-                                                                                   ? kits.Select(x => x.Name)
-                                                                                         .ToSentence()
+                                                                                   ? kits.Select(x => x.Name).ToSentence()
                                                                                    : "None");
                 return;
             }
@@ -122,8 +121,7 @@ namespace Oxide.Plugins
                             return;
                         }
 
-                        var seconds = ParseTime(string.Join(string.Empty, args.Skip(2)
-                                                                              .ToArray()));
+                        var seconds = ParseTime(string.Join(string.Empty, args.Skip(2).ToArray()));
                         Message(player, "CooldownSet", kit.Name, seconds == 0
                                                                      ? "Nothing"
                                                                      : FormatTime(seconds));
@@ -191,7 +189,13 @@ namespace Oxide.Plugins
                         }
 
                         Message(player, "Duplicated", kit.Name, name);
-                        _data.Kits.Add(new Kit(kit.Cooldown, kit.Items, kit.Limit, name));
+                        _data.Kits.Add(new Kit
+                        {
+                            Cooldown = kit.Cooldown,
+                            Items = kit.Items,
+                            Limit = kit.Limit,
+                            Name = name
+                        });
                         permission.RegisterPermission($"kits.{name}", this);
                         break;
                     }
@@ -321,7 +325,7 @@ namespace Oxide.Plugins
                         }
 
                         string message;
-                        if (!IsKitRedeemable(player.userID, kit, out message))
+                        if (!IsKitRedeemable(player, kit, out message))
                         {
                             PrintToChat(player, message);
                             return;
@@ -343,7 +347,7 @@ namespace Oxide.Plugins
                         var playerData = _data[player.userID];
                         playerData.AddRedemption(kit.Name);
                         playerData.SetCooldown(kit.Name, kit.Cooldown);
-                        LogToFile("RedemptionLog", $"{DateTime.UtcNow.ToShortTimeString()} {player.displayName, -32} {player.userID} {kit.Name}", this, false);
+                        LogToFile("RedemptionLog", $"{DateTime.UtcNow.ToShortTimeString()} {player.displayName,-32} {player.userID} {kit.Name}", this, false);
                         break;
                     }
             }
@@ -362,27 +366,27 @@ namespace Oxide.Plugins
             }
         }
 
-        private bool IsKitRedeemable(ulong userId, Kit kit, out string message)
+        private bool IsKitRedeemable(BasePlayer player, Kit kit, out string message)
         {
-            if (!permission.UserHasPermission(userId.ToString(), $"kits.{kit.Name}"))
+            if (!HasPermission(player, $"kits.{kit.Name}"))
             {
-                message = lang.GetMessage("PermissionError", this, userId.ToString());
+                message = lang.GetMessage("PermissionError", this, player.ToString());
                 return false;
             }
 
-            var player = _data[userId];
+            var playerData = _data[player.userID];
             if (kit.Limit != 0
-                && player.Redemptions.ContainsKey(kit.Name)
-                && player.Redemptions[kit.Name] >= kit.Limit)
+                && playerData.Redemptions.ContainsKey(kit.Name)
+                && playerData.Redemptions[kit.Name] >= kit.Limit)
             {
-                message = string.Format(covalence.FormatText(lang.GetMessage("LimitError", this, userId.ToString())), kit.Name);
+                message = string.Format(covalence.FormatText(lang.GetMessage("LimitError", this, player.ToString())), kit.Name);
                 return false;
             }
 
             long seconds;
-            if (player.HasCooldown(kit.Name, out seconds))
+            if (playerData.HasCooldown(kit.Name, out seconds))
             {
-                message = string.Format(covalence.FormatText(lang.GetMessage("CooldownError", this, userId.ToString())), kit.Name, FormatTime(seconds));
+                message = string.Format(covalence.FormatText(lang.GetMessage("CooldownError", this, player.ToString())), kit.Name, FormatTime(seconds));
                 return false;
             }
 
@@ -436,8 +440,7 @@ namespace Oxide.Plugins
                 ['d'] = 86400
             };
 
-            return (from @group in Regex.Matches(input.Replace(" ", string.Empty), @"(?'number'\d+)(?'identifier'[a-zA-Z])").Cast<Match>()
-                                                                                                                            .Select(x => x.Groups)
+            return (from @group in Regex.Matches(input.Replace(" ", string.Empty), @"(?'number'\d+)(?'identifier'[a-zA-Z])").Cast<Match>().Select(x => x.Groups)
                     let keyValuePair = conversions.SingleOrDefault(x => x.Key.ToString() == @group["identifier"].Value.ToLower())
                     select Convert.ToInt64(@group["number"].Value) * keyValuePair.Value).Sum();
         }
@@ -478,8 +481,15 @@ namespace Oxide.Plugins
         private void Init()
         {
             Instance = this;
+
+            JsonConvert.DefaultSettings = () => new JsonSerializerSettings
+            {
+                DefaultValueHandling = DefaultValueHandling.Ignore
+            };
+
             _data.Kits = Interface.Oxide.DataFileSystem.ReadObject<HashSet<Kit>>("Kits/Kits");
             _data.Players = Interface.Oxide.DataFileSystem.ReadObject<HashSet<PlayerData>>("Kits/PlayerData");
+
             permission.RegisterPermission("kits.admin", this);
             foreach (var kit in _data.Kits)
             {
@@ -489,10 +499,7 @@ namespace Oxide.Plugins
 
         private void OnPlayerRespawned(BasePlayer player)
         {
-            var kit = _configuration.DefaultKits.Select(x => _data[x])
-                                                .Where(x => x != null)
-                                                .LastOrDefault(x => HasPermission(player, $"kits.{x.Name}"));
-
+            var kit = _configuration.DefaultKits.Select(x => _data[x]).Where(x => x != null).LastOrDefault(x => HasPermission(player, $"kits.{x.Name}"));
             if (kit == null)
             {
                 return;
@@ -555,19 +562,14 @@ namespace Oxide.Plugins
 
         private class Kit
         {
-            [JsonConstructor]
-            public Kit(long cooldown, HashSet<KitItem> items, int limit, string name)
+            public Kit()
             {
-                this.Cooldown = cooldown;
-                this.Items = items;
-                this.Limit = limit;
-                this.Name = name;
             }
 
             public Kit(BasePlayer player, string name)
             {
-                this.Items = new HashSet<KitItem>(player.inventory.AllItems().Select(x => new KitItem(x)));
-                this.Name = name;
+                Items = new HashSet<KitItem>(player.inventory.AllItems().Select(x => new KitItem(x)));
+                Name = name;
             }
 
             [JsonProperty("cooldown")]
@@ -593,35 +595,53 @@ namespace Oxide.Plugins
 
         private class KitItem
         {
-            [JsonConstructor]
-            public KitItem(int amount, Container container, int position, string shortname, ulong skinId)
+            public KitItem()
             {
-                this.Amount = amount;
-                this.Container = container;
-                this.Position = position;
-                this.Shortname = shortname;
-                this.SkinId = skinId;
             }
 
             public KitItem(Item item)
             {
-                this.Amount = item.amount;
+                var magazine = (item.GetHeldEntity() as BaseProjectile)?.primaryMagazine;
+                if (magazine != null)
+                {
+                    AmmoType = magazine.ammoType.shortname;
+                }
+
+                Amount = item.amount;
+                Blueprint = item.IsBlueprint();
                 var parent = item.parent;
-                this.Container = parent.HasFlag(ItemContainer.Flag.Belt)
+                Container = parent.HasFlag(ItemContainer.Flag.Belt)
                                     ? Container.Belt
                                     : (parent.HasFlag(ItemContainer.Flag.Clothing)
                                         ? Container.Wear
                                         : Container.Main);
-                this.Position = item.position;
-                this.Shortname = item.info.shortname;
-                this.SkinId = item.skin;
+                if (item.contents != null)
+                {
+                    foreach (var content in item.contents.itemList)
+                    {
+                        Contents.Add(new KitItem(content));
+                    }
+                }
+
+                Position = item.position;
+                Shortname = Blueprint ? item.blueprintTargetDef.shortname : item.info.shortname;
+                SkinId = item.skin;
             }
+
+            [JsonProperty("ammoType")]
+            public string AmmoType { get; set; }
 
             [JsonProperty("amount")]
             public int Amount { get; set; }
 
+            [JsonProperty("blueprint")]
+            public bool Blueprint { get; set; }
+
             [JsonProperty("container")]
             public Container Container { get; set; }
+
+            [JsonProperty("contents")]
+            public HashSet<KitItem> Contents { get; set; } = new HashSet<KitItem>();
 
             [JsonProperty("position")]
             public int Position { get; set; }
@@ -634,7 +654,25 @@ namespace Oxide.Plugins
 
             public Item Create()
             {
-                var item = ItemManager.CreateByName(Shortname, Amount, SkinId);
+                var item = ItemManager.CreateByName(Blueprint ? "blueprintbase" : Shortname, Amount, SkinId);
+                if (Blueprint)
+                {
+                    item.blueprintTarget = ItemManager.FindItemDefinition(Shortname).itemid;
+                    return item;
+                }
+
+                if (!string.IsNullOrEmpty(AmmoType))
+                {
+                    var magazine = (item.GetHeldEntity() as BaseProjectile)?.primaryMagazine;
+                    magazine.ammoType = ItemManager.FindItemDefinition(AmmoType);
+                    magazine.contents = magazine.capacity;
+                }
+
+                foreach (var content in Contents)
+                {
+                    content.Create().MoveToContainer(item.contents);
+                }
+
                 return item;
             }
 
@@ -658,16 +696,13 @@ namespace Oxide.Plugins
 
         private class PlayerData
         {
-            [JsonConstructor]
-            public PlayerData(ulong userId, Dictionary<string, long> cooldowns)
+            public PlayerData()
             {
-                this.UserId = userId;
-                this.Cooldowns = cooldowns;
             }
 
             public PlayerData(ulong userId)
             {
-                this.UserId = userId;
+                UserId = userId;
             }
 
             [JsonProperty("userId")]
