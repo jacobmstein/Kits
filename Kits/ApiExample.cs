@@ -8,15 +8,37 @@ namespace Oxide.Plugins
         [PluginReference]
         private Plugin Kits;
 
-        [ChatCommand("canuse")]
-        private void CanUseCommand(BasePlayer player, string command, string[] args)
+        [ChatCommand("givekit")]
+        private void GiveKitCommand(BasePlayer player, string command, string[] args)
         {
             if (args.Length == 0)
             {
                 return;
             }
 
-            PrintToChat(player, $" You {(Kits.Call<bool>("IsKitRedeemable", player.userID, args[0].ToLower()) ? "may" : "may not")} use kit {args[0].ToLower()}.");
+            Kits.Call("GiveKit", player, args[0]);
+        }
+
+        [ChatCommand("iskit")]
+        private void IsKitCommand(BasePlayer player, string command, string[] args)
+        {
+            if (args.Length == 0)
+            {
+                return;
+            }
+
+            PrintToChat(player, $"{args[0].ToLower()} is{(Kits.Call<bool>("IsKit", args[0].ToLower()) ? "" : " not")} a kit.");
+        }
+
+        [ChatCommand("iskitredeemable")]
+        private void IsKitRedeemableCommand(BasePlayer player, string command, string[] args)
+        {
+            if (args.Length == 0)
+            {
+                return;
+            }
+
+            PrintToChat(player, $" You may{(Kits.Call<bool>("IsKitRedeemable", player.userID, args[0].ToLower()) ? "" : " not")} redeem kit {args[0].ToLower()}.");
         }
 
         private object CanRedeemKit(BasePlayer player, string name) => name == "blocked" 

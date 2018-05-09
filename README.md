@@ -30,7 +30,7 @@ The kits which the user has permission for are displayed.
 
 ---
 ### Redeem
-The redeem command allows players to redeem a chosen kit, assuming they're eligible.
+The redeem command allows players to redeem a kit, if they're eligible.
 #### Arguments
 | Argument Name | Description          |
 | ------------- | -------------------- |
@@ -176,24 +176,55 @@ Head over to the [releases](https://github.com/jacobmstein/Kits/releases) and do
 The permission `kits.admin` is required to use most commands. For every kit that's created a corresponding permission is registered, following the pattern `kits.<name>`, where `name` is the name of the kit. A guide on using Oxide's permission system can be found [here](https://oxidemod.org/threads/using-the-oxide-permission-system.24291/).
 
 ## API
-The following API method is currently available.
+The following API methods are currently available.
+* [`GiveKit`](#givekit)
+* [`IsKit`](#iskit)
 * [`IsKitRedeemable`](#iskitredeemable)
 
 The following hook is currently called by Kits.
 * [`CanRedeemKit`](#canredeemkit)
 
+### `GiveKit`
+`GiveKit` gives a kit to the `player`.
+#### Arguments
+| Argument Name | Type         | Description          |
+| ------------- | ------------ | -------------------- |
+| `player`      | `BasePlayer` | The player.          |
+| `name`        | `string`     | The name of the kit. |
+#### Syntax
+`GiveKit(BasePlayer player, string name)`
+#### Example
+```csharp
+Kits.Call("GiveKit", player, "example");
+```
+
+---
+### `IsKit`
+`IsKit` returns whether a kit exists by the `name`.
+#### Arguments
+| Argument Name | Type     | Description            |
+| ------------- | -------- | ---------------------- |
+| `name`        | `string` | The name of the kit.   |
+#### Syntax
+`IsKit(string name)`
+#### Example
+```csharp
+var isKit = Kits.Call<bool>("IsKit", "example");
+```
+
+---
 ### `IsKitRedeemable`
-`IsKitRedeemable` returns whether or not the player can use the kit, taking into account permissions, limits, and cooldowns.
+`IsKitRedeemable` returns whether the `player` can use the kit, taking into account permissions, limits, and cooldowns.
 #### Arguments
 | Argument Name | Type     | Description            |
 | ------------- | -------- | ---------------------- |
 | `userId`      | `ulong`  | The player's Steam ID. |
-| `name`        | `string` |The name of the kit.    |
+| `name`        | `string` | The name of the kit.   |
 #### Syntax
 `IsKitRedeemable(ulong userId, string name)`
 #### Example
 ```csharp
-var canUse = Kits.Call<bool>("IsKitRedeemable", player.userID, "example");
+var isRedeemable = Kits.Call<bool>("IsKitRedeemable", player.userID, "example");
 ```
 
 ---
@@ -205,7 +236,7 @@ var canUse = Kits.Call<bool>("IsKitRedeemable", player.userID, "example");
 | `player`       | `BasePlayer` | The player.          | True     | 
 | `name`         | `string`     | The name of the kit. | False    |
 #### Return Behavior
-Return a non-null value to override default behavior, specifically a string if you'd like to send a message to the player.
+Return a non-null value to override default behavior, specifically a string if you'd like to send a message to the `player`.
 #### Examples
 ```csharp
 private object CanRedeemKit(BasePlayer player) => blockAllKits 

@@ -31,6 +31,26 @@ namespace Oxide.Plugins
 
         #endregion
 
+        #region API
+
+        private bool IsKit(string name) => _data[name] != null;
+
+        private bool IsKitRedeemable(ulong userId, string name)
+        {
+            var kit = _data[name];
+            if (kit == null)
+            {
+                return false;
+            }
+
+            string message;
+            return IsKitRedeemable(userId, kit, out message);
+        }
+
+        private void GiveKit(BasePlayer player, string name) => _data[name]?.Give(player);
+
+        #endregion
+
         #region Chat Commands
 
         [ChatCommand("kit")]
@@ -81,6 +101,7 @@ namespace Oxide.Plugins
                         permission.RegisterPermission($"kits.{name}", this);
                         break;
                     }
+
                 case "cooldown":
                     {
                         if (!HasPermission(player))
@@ -109,6 +130,7 @@ namespace Oxide.Plugins
                         kit.Cooldown = seconds;
                         break;
                     }
+
                 case "delete":
                 case "remove":
                     {
@@ -140,6 +162,7 @@ namespace Oxide.Plugins
 
                         break;
                     }
+
                 case "duplicate":
                     {
                         if (!HasPermission(player))
@@ -172,11 +195,13 @@ namespace Oxide.Plugins
                         permission.RegisterPermission($"kits.{name}", this);
                         break;
                     }
+
                 case "help":
                     {
                         Message(player, "Help");
                         break;
                     }
+
                 case "items":
                 case "update":
                     {
@@ -202,6 +227,7 @@ namespace Oxide.Plugins
                         kit.Items = new HashSet<KitItem>(player.inventory.AllItems().Select(x => new KitItem(x)));
                         break;
                     }
+
                 case "max":
                 case "limit":
                     {
@@ -233,6 +259,7 @@ namespace Oxide.Plugins
                         kit.Limit = limit;
                         break;
                     }
+
                 case "rename":
                     {
                         if (!HasPermission(player))
@@ -284,6 +311,7 @@ namespace Oxide.Plugins
                         permission.RegisterPermission($"kits.{newName}", this);
                         break;
                     }
+
                 default:
                     {
                         var kit = _data[args[0].ToLower()];
@@ -325,11 +353,7 @@ namespace Oxide.Plugins
 
         #region Methods
 
-        /// <summary>
-        /// Clears the player's inventory.
-        /// </summary>
-        /// <param name="player">The player.</param>
-        public static void ClearInventory(BasePlayer player)
+        private void ClearInventory(BasePlayer player)
         {
             foreach (var item in player.inventory.AllItems())
             {
@@ -338,24 +362,6 @@ namespace Oxide.Plugins
             }
         }
 
-        /// <summary>
-        /// Checks whether or not the player can use the kit. 
-        /// </summary>
-        /// <param name="userId">The player's Steam ID.</param>
-        /// <param name="name">The kit name.</param>
-        /// <returns>The verdict.</returns>
-        private bool IsKitRedeemable(ulong userId, string name)
-        {
-            string message;
-            return IsKitRedeemable(userId, _data[name], out message);
-        }
-
-        /// <summary>
-        /// Checks whether or not the player can use the kit. 
-        /// </summary>
-        /// <param name="userId">The player's Steam ID.</param>
-        /// <param name="kit">The kit.</param>
-        /// <returns>The verdict.</returns>
         private bool IsKitRedeemable(ulong userId, Kit kit, out string message)
         {
             if (!permission.UserHasPermission(userId.ToString(), $"kits.{kit.Name}"))
@@ -384,18 +390,9 @@ namespace Oxide.Plugins
             return true;
         }
 
-        /// <summary>
-        /// Calculates the UNIX Epoch.
-        /// </summary>
-        /// <returns>The UNIX Epoch.</returns>
         private long Epoch() =>
             (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds;
 
-        /// <summary>
-        /// Formats time.
-        /// </summary>
-        /// <param name="seconds">The number of seconds.</param>
-        /// <returns>The formatted time.</returns>
         private string FormatTime(long seconds)
         {
             var phrases = new List<string>();
@@ -423,29 +420,12 @@ namespace Oxide.Plugins
             return phrases.ToSentence();
         }
 
-        /// <summary>
-        /// Checks whether or not the player has the permission.
-        /// </summary>
-        /// <param name="player">The player.</param>
-        /// <param name="permission">The permission.</param>
-        /// <returns>The verdict.</returns>
         private bool HasPermission(BasePlayer player, string permission = "kits.admin") =>
             Instance.permission.UserHasPermission(player.UserIDString, permission) || player.IsAdmin;
 
-        /// <summary>
-        /// Messages the player.
-        /// </summary>
-        /// <param name="player">The player.</param>
-        /// <param name="key">The key.</param>
-        /// <param name="args">The args.</param>
         private void Message(BasePlayer player, string key, params object[] args) =>
             PrintToChat(player, covalence.FormatText(lang.GetMessage(key, this, player.UserIDString)), args);
 
-        /// <summary>
-        /// Parses time.
-        /// </summary>
-        /// <param name="input">The time string, e.g. 1 day 2 hours 3 minutes.</param>
-        /// <returns>The number of seconds.</returns>
         private long ParseTime(string input)
         {
             var conversions = new Dictionary<char, int>
@@ -602,10 +582,6 @@ namespace Oxide.Plugins
             [JsonProperty("name")]
             public string Name { get; set; }
 
-            /// <summary>
-            /// Creates and the gives the kit to the player.
-            /// </summary>
-            /// <param name="player">The player.</param>
             public void Give(BasePlayer player)
             {
                 foreach (var item in Items)
@@ -656,20 +632,12 @@ namespace Oxide.Plugins
             [JsonProperty("skinId")]
             public ulong SkinId { get; set; }
 
-            /// <summary>
-            /// Creates the item based off the properties.
-            /// </summary>
-            /// <returns>The created item.</returns>
             public Item Create()
             {
                 var item = ItemManager.CreateByName(Shortname, Amount, SkinId);
                 return item;
             }
 
-            /// <summary>
-            /// Creates and gives the item to the player.
-            /// </summary>
-            /// <param name="player">The player.</param>
             public void Give(BasePlayer player)
             {
                 var container = Container == Container.Belt
@@ -711,10 +679,6 @@ namespace Oxide.Plugins
             [JsonProperty("redemptions")]
             public Dictionary<string, int> Redemptions = new Dictionary<string, int>();
 
-            /// <summary>
-            /// Increases the redemptions for the kit by 1.
-            /// </summary>
-            /// <param name="name">The kit name.</param>
             public void AddRedemption(string name)
             {
                 if (Redemptions.ContainsKey(name))
@@ -727,12 +691,6 @@ namespace Oxide.Plugins
                 }
             }
 
-            /// <summary>
-            /// Checks whether or not the player has a cooldown for the kit.
-            /// </summary>
-            /// <param name="name">The kit name.</param>
-            /// <param name="seconds">The number of seconds.</param>
-            /// <returns></returns>
             public bool HasCooldown(string name, out long seconds)
             {
                 if (Cooldowns.TryGetValue(name, out seconds) && seconds > Instance.Epoch())
@@ -744,11 +702,6 @@ namespace Oxide.Plugins
                 return false;
             }
 
-            /// <summary>
-            /// Sets the cooldown for the kit.
-            /// </summary>
-            /// <param name="name">The kit name.</param>
-            /// <param name="seconds">The number of seconds.</param>
             public void SetCooldown(string name, long seconds) => Cooldowns[name] = Instance.Epoch() + seconds;
         }
 
