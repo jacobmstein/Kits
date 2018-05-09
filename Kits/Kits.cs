@@ -478,8 +478,15 @@ namespace Oxide.Plugins
         private void Init()
         {
             Instance = this;
+
+            JsonConvert.DefaultSettings = () => new JsonSerializerSettings
+            {
+                DefaultValueHandling = DefaultValueHandling.Ignore
+            };
+
             _data.Kits = Interface.Oxide.DataFileSystem.ReadObject<HashSet<Kit>>("Kits/Kits");
             _data.Players = Interface.Oxide.DataFileSystem.ReadObject<HashSet<PlayerData>>("Kits/PlayerData");
+
             permission.RegisterPermission("kits.admin", this);
             foreach (var kit in _data.Kits)
             {
@@ -558,16 +565,16 @@ namespace Oxide.Plugins
             [JsonConstructor]
             public Kit(long cooldown, HashSet<KitItem> items, int limit, string name)
             {
-                this.Cooldown = cooldown;
-                this.Items = items;
-                this.Limit = limit;
-                this.Name = name;
+                Cooldown = cooldown;
+                Items = items;
+                Limit = limit;
+                Name = name;
             }
 
             public Kit(BasePlayer player, string name)
             {
-                this.Items = new HashSet<KitItem>(player.inventory.AllItems().Select(x => new KitItem(x)));
-                this.Name = name;
+                Items = new HashSet<KitItem>(player.inventory.AllItems().Select(x => new KitItem(x)));
+                Name = name;
             }
 
             [JsonProperty("cooldown")]
@@ -594,31 +601,36 @@ namespace Oxide.Plugins
         private class KitItem
         {
             [JsonConstructor]
-            public KitItem(int amount, Container container, int position, string shortname, ulong skinId)
+            public KitItem(int amount, bool blueprint, Container container, int position, string shortname, ulong skinId)
             {
-                this.Amount = amount;
-                this.Container = container;
-                this.Position = position;
-                this.Shortname = shortname;
-                this.SkinId = skinId;
+                Amount = amount;
+                Blueprint = blueprint;
+                Container = container;
+                Position = position;
+                Shortname = shortname;
+                SkinId = skinId;
             }
 
             public KitItem(Item item)
             {
-                this.Amount = item.amount;
+                Amount = item.amount;
+                Blueprint = item.info.shortname == "blueprintbase";
                 var parent = item.parent;
-                this.Container = parent.HasFlag(ItemContainer.Flag.Belt)
+                Container = parent.HasFlag(ItemContainer.Flag.Belt)
                                     ? Container.Belt
                                     : (parent.HasFlag(ItemContainer.Flag.Clothing)
                                         ? Container.Wear
                                         : Container.Main);
-                this.Position = item.position;
-                this.Shortname = item.info.shortname;
-                this.SkinId = item.skin;
+                Position = item.position;
+                Shortname = Blueprint ? item.blueprintTargetDef.shortname : item.info.shortname;
+                SkinId = item.skin;
             }
 
             [JsonProperty("amount")]
             public int Amount { get; set; }
+
+            [JsonProperty("blueprint")]
+            public bool Blueprint { get; set; }
 
             [JsonProperty("container")]
             public Container Container { get; set; }
@@ -634,7 +646,12 @@ namespace Oxide.Plugins
 
             public Item Create()
             {
-                var item = ItemManager.CreateByName(Shortname, Amount, SkinId);
+                var item = ItemManager.CreateByName(Blueprint ? "blueprintbase" : Shortname, Amount, SkinId);
+                if (Blueprint)
+                {
+                    item.blueprintTarget = ItemManager.FindItemDefinition(Shortname).itemid;
+                }
+
                 return item;
             }
 
@@ -661,13 +678,13 @@ namespace Oxide.Plugins
             [JsonConstructor]
             public PlayerData(ulong userId, Dictionary<string, long> cooldowns)
             {
-                this.UserId = userId;
-                this.Cooldowns = cooldowns;
+                UserId = userId;
+                Cooldowns = cooldowns;
             }
 
             public PlayerData(ulong userId)
             {
-                this.UserId = userId;
+                UserId = userId;
             }
 
             [JsonProperty("userId")]
