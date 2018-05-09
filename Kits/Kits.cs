@@ -601,27 +601,35 @@ namespace Oxide.Plugins
 
             public KitItem(Item item)
             {
+                var magazine = (item.GetHeldEntity() as BaseProjectile)?.primaryMagazine;
+                if (magazine != null)
+                {
+                    AmmoType = magazine.ammoType.shortname;
+                }
+
                 Amount = item.amount;
-                Blueprint = item.info.shortname == "blueprintbase";
+                Blueprint = item.IsBlueprint();
                 var parent = item.parent;
                 Container = parent.HasFlag(ItemContainer.Flag.Belt)
                                     ? Container.Belt
                                     : (parent.HasFlag(ItemContainer.Flag.Clothing)
                                         ? Container.Wear
                                         : Container.Main);
+                if (item.contents != null)
+                {
+                    foreach (var content in item.contents.itemList)
+                    {
+                        Contents.Add(new KitItem(content));
+                    }
+                }
+
                 Position = item.position;
                 Shortname = Blueprint ? item.blueprintTargetDef.shortname : item.info.shortname;
                 SkinId = item.skin;
-                if (item.contents == null)
-                {
-                    return;
-                }
-
-                foreach (var content in item.contents.itemList)
-                {
-                    Contents.Add(new KitItem(content));
-                }
             }
+
+            [JsonProperty("ammoType")]
+            public string AmmoType { get; set; }
 
             [JsonProperty("amount")]
             public int Amount { get; set; }
@@ -651,6 +659,13 @@ namespace Oxide.Plugins
                 {
                     item.blueprintTarget = ItemManager.FindItemDefinition(Shortname).itemid;
                     return item;
+                }
+
+                if (!string.IsNullOrEmpty(AmmoType))
+                {
+                    var magazine = (item.GetHeldEntity() as BaseProjectile)?.primaryMagazine;
+                    magazine.ammoType = ItemManager.FindItemDefinition(AmmoType);
+                    magazine.contents = magazine.capacity;
                 }
 
                 foreach (var content in Contents)
