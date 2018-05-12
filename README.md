@@ -158,16 +158,6 @@ The permission `kits.admin` is required.
 ```
 #### Default kits
 Simply enter the names of kits to spawn with. When a player respawns, the last one they have permission to use will be given.
-### Example Configuration
-```javascript
-{
-  "Default kits (lowest to highest priority)": [
-    "default",
-    "donator"
-  ],
-  "Wipe player data on new save (true/false)": true
-}
-```
 
 ## Installation
 Head over to the [releases](https://github.com/jacobmstein/Kits/releases) and download the latest version, then simply follow [this guide](https://oxidemod.org/threads/installing-and-configuring-plugins-for-oxide.24298/).
@@ -181,7 +171,8 @@ The following API methods are currently available.
 * [`IsKit`](#iskit)
 * [`IsKitRedeemable`](#iskitredeemable)
 
-The following hook is currently called by Kits.
+The following hooks are currently called by Kits.
+* [`CanGiveDefaultKit`](#cangivedefaultkit)
 * [`CanRedeemKit`](#canredeemkit)
 
 ### `GiveKit`
@@ -227,6 +218,29 @@ var isKit = Kits.Call<bool>("IsKit", "example");
 var isRedeemable = Kits.Call<bool>("IsKitRedeemable", player, "example");
 ```
 
+### `CanGiveDefaultKit`
+`CanGiveDefaultKit` allows other plugins to intercept Kits giving [default kits](#default-kits).
+#### Parameters
+| Parameter Name | Type         | Description          | Required |
+| -------------- | ------------ | -------------------- | -------- |
+| `player`       | `BasePlayer` | The player.          | True     | 
+| `name`         | `string`     | The name of the kit. | False    |
+#### Return Behavior
+Return a non-null value to override default behavior.
+#### Examples
+```csharp
+private object CanGiveDefaultKit(BasePlayer player) => blockAllKits 
+    ? false
+    : (object)null;
+```
+> Note, the overload with the `name` parameter will override the one without, as it's more specific.
+
+```csharp
+private object CanGiveDefaultKit(BasePlayer player, string name) => name == "blocked" 
+    ? false
+    : (object)null;
+```
+
 ---
 ### `CanRedeemKit`
 `CanRedeemKit` allows other plugins to intercept kit redemption.
@@ -239,15 +253,15 @@ var isRedeemable = Kits.Call<bool>("IsKitRedeemable", player, "example");
 Return a non-null value to override default behavior, specifically a string if you'd like to send a message to the `player`.
 #### Examples
 ```csharp
-private object CanRedeemKit(BasePlayer player) => blockAllKits 
-    ? $"{Title} is preventing you from using that kit." 
+private object CanRedeemKit(BasePlayer player) => blockAllKits
+    ? $"{Title} is preventing you from using that kit."
     : null;
 ```
 > Note, the overload with the `name` parameter will override the one without, as it's more specific.
 
 ```csharp
 private object CanRedeemKit(BasePlayer player, string name) => name == "blocked" 
-    ? $"{Title} is preventing you from using that kit." 
+    ? $"{Title} is preventing you from using that kit."
     : null;
 ```
 

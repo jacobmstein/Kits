@@ -505,6 +505,13 @@ namespace Oxide.Plugins
                 return;
             }
 
+            var result = Interface.CallHook("CanGiveDefaultKit", player);
+            result = Interface.CallHook("CanGiveDefaultKit", player, kit.Name) ?? result;
+            if (result != null)
+            {
+                return;
+            }
+
             ClearInventory(player);
             kit.Give(player);
         }
@@ -624,7 +631,9 @@ namespace Oxide.Plugins
                 }
 
                 Position = item.position;
-                Shortname = Blueprint ? item.blueprintTargetDef.shortname : item.info.shortname;
+                Shortname = Blueprint 
+                                ? item.blueprintTargetDef.shortname 
+                                : item.info.shortname;
                 SkinId = item.skin;
             }
 
@@ -654,7 +663,9 @@ namespace Oxide.Plugins
 
             public Item Create()
             {
-                var item = ItemManager.CreateByName(Blueprint ? "blueprintbase" : Shortname, Amount, SkinId);
+                var item = ItemManager.CreateByName(Blueprint 
+                                                        ? "blueprintbase" 
+                                                        : Shortname, Amount, SkinId);
                 if (Blueprint)
                 {
                     item.blueprintTarget = ItemManager.FindItemDefinition(Shortname).itemid;
