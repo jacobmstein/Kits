@@ -16,6 +16,7 @@ The following commands are currently available.
 * [Create](#create)
 * [Cooldown](#cooldown)
 * [Duplicate](#duplicate)
+* [Give](#give)
 * [Limit](#limit)
 * [Remove](#remove)
 * [Rename](#rename)
@@ -60,7 +61,7 @@ The permission `kits.admin` is required.
 
 ---
 ### Cooldown
-The cooldown command sets the minimum time between redemptions.
+The cooldown command sets the minimum time between redemptions for a kit.
 #### Arguments
 | Argument Name | Description          |
 | ------------- | -------------------- |
@@ -80,7 +81,7 @@ The permission `kits.admin` is required.
 The duplicate command duplicates a kit.
 #### Arguments
 | Argument Name | Description              |
-| ------------- | --------------------     |
+| ------------- | ------------------------ |
 | `name`        | The name of the kit.     |
 | `newName`     | The name of the new kit. |
 #### Permissions
@@ -91,11 +92,27 @@ The permission `kits.admin` is required.
 `/kit duplicate example test`
 
 ---
+### Give
+The give command gives a kit to the `player` or all players if no `player` argument is provided.
+| Argument Name | Description          | Required |
+| ------------- | -------------------- | -------- |
+| `name`        | The name of the kit. | True     |
+| `player`      | The player.          | False    |
+#### Permissions
+The permission `kits.admin` is required.
+#### Syntax
+`/kit give <name> <player>`
+#### Example
+`/kit give example Jacob`
+
+`/kit give example`
+
+---
 ### Limit
 The limit command sets the maximum amount of redemptions, per player.
 #### Arguments
 | Argument Name | Description           |
-| ------------- | --------------------  |
+| ------------- | --------------------- |
 | `name`        | The name of the kit.  |
 | `amount`      | The redemption limit. |
 #### Permissions
@@ -124,7 +141,7 @@ The permission `kits.admin` is required.
 The rename command renames a kit.
 #### Arguments
 | Argument Name | Description              |
-| ------------- | --------------------     |
+| ------------- | ------------------------ |
 | `name`        | The name of the kit.     |
 | `newName`     | The new name of the kit. |
 #### Permissions
@@ -136,7 +153,7 @@ The permission `kits.admin` is required.
 
 ---
 ### Update
-The update command sets the kit's items to those in your inventory.
+The update command sets a kit's items to those in your inventory.
 #### Arguments
 | Argument Name | Description          |
 | ------------- | -------------------- |
