@@ -7,7 +7,7 @@ using Oxide.Core;
 
 namespace Oxide.Plugins
 {
-    [Info("Kits", "Jacob", "4.0.0-alpha.1", ResourceId = 668)]
+    [Info("Kits", "Jacob", "4.0.0-alpha.2", ResourceId = 668)]
     internal class Kits : RustPlugin
     {
         #region Fields
@@ -83,7 +83,7 @@ namespace Oxide.Plugins
 
                         var name = args[1].ToLower();
                         if (!Regex.IsMatch(name, "[a-zA-Z]")
-                            || new[] { "add", "admin", "cooldown", "create", "delete", "duplicate", "help", "items", "limit", "max", "remove", "rename", "update" }.Contains(name))
+                            || new[] { "add", "admin", "cooldown", "create", "delete", "duplicate", "give", "help", "items", "limit", "max", "remove", "rename", "update" }.Contains(name))
                         {
                             Message(player, "InvalidName");
                             return;
@@ -117,7 +117,7 @@ namespace Oxide.Plugins
                         var kit = _data[args[1].ToLower()];
                         if (kit == null)
                         {
-                            Message(player, "Doesn'tExistError", _data[args[1].ToLower()]);
+                            Message(player, "Doesn'tExistError", args[1].ToLower());
                             return;
                         }
 
@@ -146,7 +146,7 @@ namespace Oxide.Plugins
                         var kit = _data[args[1].ToLower()];
                         if (kit == null)
                         {
-                            Message(player, "Doesn'tExistError", _data[args[1].ToLower()]);
+                            Message(player, "Doesn'tExistError", args[1].ToLower());
                             return;
                         }
 
@@ -177,7 +177,7 @@ namespace Oxide.Plugins
                         var kit = _data[args[1].ToLower()];
                         if (kit == null)
                         {
-                            Message(player, "Doesn'tExistError", _data[args[1].ToLower()]);
+                            Message(player, "Doesn'tExistError", args[1].ToLower());
                             return;
                         }
 
@@ -197,6 +197,54 @@ namespace Oxide.Plugins
                             Name = name
                         });
                         permission.RegisterPermission($"kits.{name}", this);
+                        break;
+                    }
+
+                case "give":
+                    {
+                        if (!HasPermission(player))
+                        {
+                            Message(player, "PermissionError");
+                            return;
+                        }
+
+                        if (args.Length < 2)
+                        {
+                            goto case "help";
+                        }
+
+                        var kit = _data[args[1].ToLower()];
+                        if (kit == null)
+                        {
+                            Message(player, "Doesn'tExistError", args[1].ToLower());
+                            return;
+                        }
+
+                        if (args.Length > 2)
+                        {
+                            var name = string.Join(" ", args.Skip(2).ToArray());
+                            var players = BasePlayer.activePlayerList.Where(x => x.displayName.Contains(name)
+                                                                            && x != player).ToArray();
+                            if (players.Length != 1)
+                            {
+                                Message(player, players.Any() ? "MultiplePlayers" : "NoPlayers", name, players.Select(x => x.displayName).ToSentence());
+                                return;
+                            }
+
+                            var target = players[0];
+                            Message(player, "Given", target.displayName, kit.Name);
+                            Message(target, "GivenToYou", player.displayName, kit.Name);
+                            kit.Give(target);
+                            return;
+                        }
+
+                        Message(player, "GivenAll", kit.Name);
+                        foreach (var target in BasePlayer.activePlayerList.Where(x => x != player))
+                        {
+                            Message(target, "GivenToYou", player.displayName, kit.Name);
+                            kit.Give(target);
+                        }
+
                         break;
                     }
 
@@ -223,7 +271,7 @@ namespace Oxide.Plugins
                         var kit = _data[args[1].ToLower()];
                         if (kit == null)
                         {
-                            Message(player, "Doesn'tExistError", _data[args[1].ToLower()]);
+                            Message(player, "Doesn'tExistError", args[1].ToLower());
                             return;
                         }
 
@@ -249,7 +297,7 @@ namespace Oxide.Plugins
                         var kit = _data[args[1].ToLower()];
                         if (kit == null)
                         {
-                            Message(player, "Doesn'tExistError", _data[args[1].ToLower()]);
+                            Message(player, "Doesn'tExistError", args[1].ToLower());
                             return;
                         }
 
@@ -280,7 +328,7 @@ namespace Oxide.Plugins
                         var kit = _data[args[1].ToLower()];
                         if (kit == null)
                         {
-                            Message(player, "Doesn'tExistError", _data[args[1].ToLower()]);
+                            Message(player, "Doesn'tExistError", args[1].ToLower());
                             return;
                         }
 
@@ -321,7 +369,8 @@ namespace Oxide.Plugins
                         var kit = _data[args[0].ToLower()];
                         if (kit == null)
                         {
-                            goto case "help";
+                            Message(player, "Doesn'tExistError", args[1].ToLower());
+                            return;
                         }
 
                         string message;
@@ -425,7 +474,8 @@ namespace Oxide.Plugins
         }
 
         private bool HasPermission(BasePlayer player, string permission = "kits.admin") =>
-            Instance.permission.UserHasPermission(player.UserIDString, permission) || player.IsAdmin;
+            Instance.permission.UserHasPermission(player.UserIDString, permission)
+            || player.IsAdmin;
 
         private void Message(BasePlayer player, string key, params object[] args) =>
             PrintToChat(player, covalence.FormatText(lang.GetMessage(key, this, player.UserIDString)), args);
@@ -465,11 +515,16 @@ namespace Oxide.Plugins
             ["Doesn'tExistError"] = "Error, no kit exists by the name [#ADD8E6]{0}[/#].",
             ["Duplicated"] = "Kit [#ADD8E6]{0}[/#] successfully duplicated as [#ADD8E6]{1}[/#].",
             ["ExistsError"] = "Error, a kit already exists by the name [#ADD8E6]{0}[/#].",
+            ["Given"] = "Kit [#ADD8E6]{0}[/#] successfully given to player [#ADD8E6]{1}[/#].",
+            ["GivenAll"] = "Kit [#ADD8E6]{0}[/#] successfully given to all players.",
+            ["GivenToYou"] = "[#ADD8E6]{0}[/#] gave you kit [#ADD8E6]{1}[/#].",
             ["Help"] = "...",
             ["InvalidName"] = "Error, invalid name.",
             ["LimitError"] = "Error, you reached the usage limit for kit [#ADD8E6]{0}[/#].",
             ["LimitSet"] = "Limit for kit [#ADD8E6]{0}[/#] successfully set to [#ADD8E6]{1}[/#].",
             ["List"] = "<size=16>Kit List</size>\nThe following kit{0} are available: [#ADD8E6]{1}[/#].",
+            ["MultiplePlayers"] = "Error, the following players were found by the name [#ADD8E6]{0}[/#]: [#ADD8E6]{1}[/#].",
+            ["NoPlayers"] = "Error, no players were found by the name [#ADD8E6]{0}[/#].",
             ["PermissionError"] = "Error, you lack permission.",
             ["Removed"] = "Kit [#ADD8E6]{0}[/#] successfully removed.",
             ["Renamed"] = "Kit [#ADD8E6]{0}[/#] successfully renamed to [#ADD8E6]{1}[/#].",
@@ -501,6 +556,13 @@ namespace Oxide.Plugins
         {
             var kit = _configuration.DefaultKits.Select(x => _data[x]).Where(x => x != null).LastOrDefault(x => HasPermission(player, $"kits.{x.Name}"));
             if (kit == null)
+            {
+                return;
+            }
+
+            var result = Interface.CallHook("CanGiveDefaultKit", player);
+            result = Interface.CallHook("CanGiveDefaultKit", player, kit.Name) ?? result;
+            if (result != null)
             {
                 return;
             }
@@ -624,7 +686,9 @@ namespace Oxide.Plugins
                 }
 
                 Position = item.position;
-                Shortname = Blueprint ? item.blueprintTargetDef.shortname : item.info.shortname;
+                Shortname = Blueprint
+                                ? item.blueprintTargetDef.shortname
+                                : item.info.shortname;
                 SkinId = item.skin;
             }
 
@@ -654,7 +718,9 @@ namespace Oxide.Plugins
 
             public Item Create()
             {
-                var item = ItemManager.CreateByName(Blueprint ? "blueprintbase" : Shortname, Amount, SkinId);
+                var item = ItemManager.CreateByName(Blueprint
+                                                        ? "blueprintbase"
+                                                        : Shortname, Amount, SkinId);
                 if (Blueprint)
                 {
                     item.blueprintTarget = ItemManager.FindItemDefinition(Shortname).itemid;
@@ -719,16 +785,16 @@ namespace Oxide.Plugins
                 if (Redemptions.ContainsKey(name))
                 {
                     Redemptions[name]++;
+                    return;
                 }
-                else
-                {
-                    Redemptions.Add(name, 1);
-                }
+
+                Redemptions.Add(name, 1);
             }
 
             public bool HasCooldown(string name, out long seconds)
             {
-                if (Cooldowns.TryGetValue(name, out seconds) && seconds > Instance.Epoch())
+                if (Cooldowns.TryGetValue(name, out seconds)
+                    && seconds > Instance.Epoch())
                 {
                     seconds -= Instance.Epoch();
                     return true;
