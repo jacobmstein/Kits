@@ -25,7 +25,7 @@ The following commands are currently available.
 
 ### List
 The list command allows players to view kits available to them.
-#### Permissions
+#### Required Permissions
 The kits which the user has permission for are displayed.
 #### Syntax
 `/kit`
@@ -37,7 +37,7 @@ The redeem command allows players to redeem a kit, if they're eligible.
 | Argument Name | Description          |
 | ------------- | -------------------- |
 | `name`        | The name of the kit. |
-#### Permissions
+#### Required Permissions
 The permission for the kit is required.
 #### Syntax
 `/kit <name>`
@@ -53,7 +53,7 @@ The create command creates a new kit based off the items in your inventory.
 | Argument Name | Description           |
 | ------------- | --------------------- |
 | `name`        | The name for the kit. |
-#### Permissions
+#### Required Permissions
 The permission `kits.admin` is required.
 #### Syntax
 `/kit create <name>`
@@ -68,7 +68,7 @@ The cooldown command sets the minimum time between redemptions for a kit.
 | ------------- | -------------------- |
 | `name`        | The name of the kit. |
 | `time`        | The minimum time.    |
-#### Permissions
+#### Required Permissions
 The permission `kits.admin` is required.
 #### Syntax
 `/kit cooldown <name> <time>`
@@ -85,7 +85,7 @@ The duplicate command duplicates a kit.
 | ------------- | ------------------------ |
 | `name`        | The name of the kit.     |
 | `newName`     | The name of the new kit. |
-#### Permissions
+#### Required Permissions
 The permission `kits.admin` is required.
 #### Syntax
 `/kit duplicate <name> <newName>`
@@ -99,7 +99,7 @@ The give command gives a kit to the `player` or all players if no `player` argum
 | ------------- | -------------------- | -------- |
 | `name`        | The name of the kit. | True     |
 | `player`      | The player.          | False    |
-#### Permissions
+#### Required Permissions
 The permission `kits.admin` is required.
 #### Syntax
 `/kit give <name> <player>`
@@ -116,7 +116,7 @@ The limit command sets the maximum amount of redemptions, per player.
 | ------------- | --------------------- |
 | `name`        | The name of the kit.  |
 | `amount`      | The redemption limit. |
-#### Permissions
+#### Required Permissions
 The permission `kits.admin` is required.
 #### Syntax
 `/kit limit <name> <amount>`
@@ -130,7 +130,7 @@ The remove command removes a kit.
 | Argument Name | Description          |
 | ------------- | -------------------- |
 | `name`        | The name of the kit. |
-#### Permissions
+#### Required Permissions
 The permission `kits.admin` is required.
 #### Syntax
 `/kit remove <name>`
@@ -145,7 +145,7 @@ The rename command renames a kit.
 | ------------- | ------------------------ |
 | `name`        | The name of the kit.     |
 | `newName`     | The new name of the kit. |
-#### Permissions
+#### Required Permissions
 The permission `kits.admin` is required.
 #### Syntax
 `/kit rename <name> <newName>`
@@ -159,7 +159,7 @@ The update command sets a kit's items to those in your inventory.
 | Argument Name | Description          |
 | ------------- | -------------------- |
 | `name`        | The name of the kit. |
-#### Permissions
+#### Required Permissions
 The permission `kits.admin` is required.
 #### Syntax
 `/kit update <name>`
