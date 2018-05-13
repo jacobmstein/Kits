@@ -5,6 +5,7 @@ Rewrite of the popular Kits plugin for Rust.
 * [Commands](#commands)
 * [Configuration](#configuration)
 * [Installation](#installation)
+* [Migrating](#migrating)
 * [Permissions](#permissions)
 * [API](#api)
 * [Contributions](#contributions)
@@ -24,7 +25,7 @@ The following commands are currently available.
 
 ### List
 The list command allows players to view kits available to them.
-#### Permissions
+#### Required Permissions
 The kits which the user has permission for are displayed.
 #### Syntax
 `/kit`
@@ -36,7 +37,7 @@ The redeem command allows players to redeem a kit, if they're eligible.
 | Argument Name | Description          |
 | ------------- | -------------------- |
 | `name`        | The name of the kit. |
-#### Permissions
+#### Required Permissions
 The permission for the kit is required.
 #### Syntax
 `/kit <name>`
@@ -52,7 +53,7 @@ The create command creates a new kit based off the items in your inventory.
 | Argument Name | Description           |
 | ------------- | --------------------- |
 | `name`        | The name for the kit. |
-#### Permissions
+#### Required Permissions
 The permission `kits.admin` is required.
 #### Syntax
 `/kit create <name>`
@@ -67,7 +68,7 @@ The cooldown command sets the minimum time between redemptions for a kit.
 | ------------- | -------------------- |
 | `name`        | The name of the kit. |
 | `time`        | The minimum time.    |
-#### Permissions
+#### Required Permissions
 The permission `kits.admin` is required.
 #### Syntax
 `/kit cooldown <name> <time>`
@@ -84,7 +85,7 @@ The duplicate command duplicates a kit.
 | ------------- | ------------------------ |
 | `name`        | The name of the kit.     |
 | `newName`     | The name of the new kit. |
-#### Permissions
+#### Required Permissions
 The permission `kits.admin` is required.
 #### Syntax
 `/kit duplicate <name> <newName>`
@@ -94,11 +95,12 @@ The permission `kits.admin` is required.
 ---
 ### Give
 The give command gives a kit to the `player` or all players if no `player` argument is provided.
+#### Arguments
 | Argument Name | Description          | Required |
 | ------------- | -------------------- | -------- |
 | `name`        | The name of the kit. | True     |
 | `player`      | The player.          | False    |
-#### Permissions
+#### Required Permissions
 The permission `kits.admin` is required.
 #### Syntax
 `/kit give <name> <player>`
@@ -115,7 +117,7 @@ The limit command sets the maximum amount of redemptions, per player.
 | ------------- | --------------------- |
 | `name`        | The name of the kit.  |
 | `amount`      | The redemption limit. |
-#### Permissions
+#### Required Permissions
 The permission `kits.admin` is required.
 #### Syntax
 `/kit limit <name> <amount>`
@@ -129,7 +131,7 @@ The remove command removes a kit.
 | Argument Name | Description          |
 | ------------- | -------------------- |
 | `name`        | The name of the kit. |
-#### Permissions
+#### Required Permissions
 The permission `kits.admin` is required.
 #### Syntax
 `/kit remove <name>`
@@ -144,7 +146,7 @@ The rename command renames a kit.
 | ------------- | ------------------------ |
 | `name`        | The name of the kit.     |
 | `newName`     | The new name of the kit. |
-#### Permissions
+#### Required Permissions
 The permission `kits.admin` is required.
 #### Syntax
 `/kit rename <name> <newName>`
@@ -158,7 +160,7 @@ The update command sets a kit's items to those in your inventory.
 | Argument Name | Description          |
 | ------------- | -------------------- |
 | `name`        | The name of the kit. |
-#### Permissions
+#### Required Permissions
 The permission `kits.admin` is required.
 #### Syntax
 `/kit update <name>`
@@ -178,6 +180,9 @@ Simply enter the names of kits to spawn with. When a player respawns, the last o
 
 ## Installation
 Head over to the [releases](https://github.com/jacobmstein/Kits/releases) and download the latest version, then simply follow [this guide](https://oxidemod.org/threads/installing-and-configuring-plugins-for-oxide.24298/).
+
+## Migrating
+If found in the data directory, data from the previous version of Kits is automatically migrated to the new schema. It's important to note that [permissions](#permissions) and [default kits](#configuration) have been updated. To ensure a good user experience for players it's suggested you read the corresponding sections after updating and act accordingly.
 
 ## Permissions
 The permission `kits.admin` is required to use most commands. For every kit that's created a corresponding permission is registered, following the pattern `kits.<name>`, where `name` is the name of the kit. A guide on using Oxide's permission system can be found [here](https://oxidemod.org/threads/using-the-oxide-permission-system.24291/).
