@@ -7,7 +7,7 @@ using Oxide.Core;
 
 namespace Oxide.Plugins
 {
-    [Info("Kits", "Jacob", "4.0.0-alpha.2", ResourceId = 668)]
+    [Info("Kits", "Jacob", "4.0.0-alpha.3", ResourceId = 668)]
     internal class Kits : RustPlugin
     {
         #region Fields
