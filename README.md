@@ -95,6 +95,7 @@ The permission `kits.admin` is required.
 ---
 ### Give
 The give command gives a kit to the `player` or all players if no `player` argument is provided.
+#### Arguments
 | Argument Name | Description          | Required |
 | ------------- | -------------------- | -------- |
 | `name`        | The name of the kit. | True     |
