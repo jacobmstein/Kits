@@ -5,6 +5,7 @@ Rewrite of the popular Kits plugin for Rust.
 * [Commands](#commands)
 * [Configuration](#configuration)
 * [Installation](#installation)
+* [Migrating](#migrating)
 * [Permissions](#permissions)
 * [API](#api)
 * [Contributions](#contributions)
@@ -178,6 +179,9 @@ Simply enter the names of kits to spawn with. When a player respawns, the last o
 
 ## Installation
 Head over to the [releases](https://github.com/jacobmstein/Kits/releases) and download the latest version, then simply follow [this guide](https://oxidemod.org/threads/installing-and-configuring-plugins-for-oxide.24298/).
+
+## Migrating
+If found in the data directory, data from the previous version of Kits is automatically migrated to the new schema. It's important to note that [permissions](#permissions) and [default kits](#configuration) have been updated. To ensure a good user experience for players it's suggested you read the corresponding sections after updating and act accordingly.
 
 ## Permissions
 The permission `kits.admin` is required to use most commands. For every kit that's created a corresponding permission is registered, following the pattern `kits.<name>`, where `name` is the name of the kit. A guide on using Oxide's permission system can be found [here](https://oxidemod.org/threads/using-the-oxide-permission-system.24291/).
