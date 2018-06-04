@@ -907,7 +907,13 @@ namespace Oxide.Plugins
 
             PrintWarning("Data successfully migrated. For full functionality it's suggested you refer to https://github.com/jacobmstein/Kits/blob/master/README.md#migrating.");
             var kits = Interface.Oxide.DataFileSystem.ReadObject<Dictionary<string, Dictionary<string, OldKit>>>("Kits");
-            _data.Kits = new HashSet<Kit>(kits["Kits"].Select(x => x.Value.ToKit()));
+            _data.Kits = new HashSet<Kit>(kits["Kits"].Select(x =>
+            {
+                var kit = x.Value.ToKit();
+                kit.Name = x.Key.ToLower();
+                return kit;
+            }));
+
             foreach (var kit in _data.Kits)
             {
                 permission.RegisterPermission($"kits.{kit.Name}", this);
@@ -1076,8 +1082,7 @@ namespace Oxide.Plugins
             {
                 Cooldown = Convert.ToInt64(Cooldown),
                 Items = new HashSet<KitItem>(Items.Select(x => x.ToKitItem())),
-                Limit = Max,
-                Name = Name.ToLower()
+                Limit = Max
             };
         }
 
