@@ -472,7 +472,7 @@ namespace Oxide.Plugins
         // Deprecated
         private string[] GetAllKits()
         {
-            PrintWarning("WARNING: The \"isKit\" API method is deprecated and will be removed on July 1st, 2018.");
+            PrintWarning("WARNING: The \"GetAllKits\" API method is deprecated and will be removed on July 1st, 2018.");
             return _data.Kits.Select(x => x.Name).ToArray();
         }
 
