@@ -450,12 +450,6 @@ namespace Oxide.Plugins
 
         #region API
 
-        private bool isKit(string name)
-        {
-            PrintWarning("WARNING: The \"isKit\" API method is deprecated and will be removed on July 1st, 2018.");
-            return IsKit(name);
-        }
-
         private bool IsKit(string name) => _data[name] != null;
 
         private bool IsKitRedeemable(BasePlayer player, string name)
@@ -470,13 +464,24 @@ namespace Oxide.Plugins
             return IsKitRedeemable(player, kit, out message);
         }
 
+        private string[] GetKits(Func<string, bool> predicate = null) =>
+            _data.Kits.Where(x => predicate?.Invoke(x.Name) ?? true).Select(x => x.Name).ToArray();
+
+        private void GiveKit(BasePlayer player, string name) => _data[name]?.Give(player);
+
+        // Deprecated
         private string[] GetAllKits()
         {
             PrintWarning("WARNING: The \"isKit\" API method is deprecated and will be removed on July 1st, 2018.");
             return _data.Kits.Select(x => x.Name).ToArray();
         }
 
-        private void GiveKit(BasePlayer player, string name) => _data[name]?.Give(player);
+        // Deprecated
+        private bool isKit(string name)
+        {
+            PrintWarning("WARNING: The \"isKit\" API method is deprecated and will be removed on July 1st, 2018.");
+            return IsKit(name);
+        }
 
         #endregion
 
