@@ -450,6 +450,12 @@ namespace Oxide.Plugins
 
         #region API
 
+        private bool isKit(string name)
+        {
+            PrintWarning("WARNING: The \"isKit\" API method is deprecated and will be removed on July 1st, 2018.");
+            return IsKit(name);
+        }
+
         private bool IsKit(string name) => _data[name] != null;
 
         private bool IsKitRedeemable(BasePlayer player, string name)
@@ -462,6 +468,12 @@ namespace Oxide.Plugins
 
             string message;
             return IsKitRedeemable(player, kit, out message);
+        }
+
+        private string[] GetAllKits()
+        {
+            PrintWarning("WARNING: The \"isKit\" API method is deprecated and will be removed on July 1st, 2018.");
+            return _data.Kits.Select(x => x.Name).ToArray();
         }
 
         private void GiveKit(BasePlayer player, string name) => _data[name]?.Give(player);
@@ -1050,7 +1062,7 @@ namespace Oxide.Plugins
             [JsonProperty("players")]
             public HashSet<PlayerData> Players { get; set; } = new HashSet<PlayerData>();
 
-            public Kit this[string name] => Kits.SingleOrDefault(x => x.Name == name);
+            public Kit this[string name] => Kits.SingleOrDefault(x => string.Equals(x.Name, name, StringComparison.CurrentCultureIgnoreCase));
 
             public PlayerData this[ulong userId]
             {
