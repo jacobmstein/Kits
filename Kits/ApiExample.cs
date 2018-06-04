@@ -41,8 +41,6 @@ namespace Oxide.Plugins
             PrintToChat(player, $" You may{(Kits.Call<bool>("IsKitRedeemable", player, args[0].ToLower()) ? "" : " not")} redeem kit {args[0].ToLower()}.");
         }
 
-        private void 
-
         private object CanGiveDefaultKit(BasePlayer player, string name) => name == "blocked" 
                                                                                 ? false 
                                                                                 : (object)null;
